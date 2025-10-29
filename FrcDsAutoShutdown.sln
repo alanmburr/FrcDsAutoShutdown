@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36603.0 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FrcDsAutoShutdown", "FrcDsAutoShutdown.csproj", "{5B0050CD-2C32-493F-A4EF-77858F7ED901}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5B0050CD-2C32-493F-A4EF-77858F7ED901}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B0050CD-2C32-493F-A4EF-77858F7ED901}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5B0050CD-2C32-493F-A4EF-77858F7ED901}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5B0050CD-2C32-493F-A4EF-77858F7ED901}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5F0FE580-1981-4EEB-AB54-AD8512737177}
+	EndGlobalSection
+EndGlobal
