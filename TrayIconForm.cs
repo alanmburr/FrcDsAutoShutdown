@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.IO.Pipes;
@@ -16,10 +17,49 @@ namespace FrcDsAutoShutdown
     public partial class TrayIconForm : Form
     {
         protected static SettingsWindow settingsWindowInstance;
+        public static bool keepAlive = true;
 
         public TrayIconForm()
         {
             InitializeComponent();
+        }
+
+        public static void Exit()
+        {
+            DhcpManager.StopListening();
+            if (DSEventsWatchdog.Configured)
+                DSEventsWatchdog.StopWatching();
+            DSEventsWatchdog.Dispose();
+
+            keepAlive = false;
+            settingsWindowInstance.Dispose();
+            var trayForm = Application.OpenForms.OfType<TrayIconForm>().FirstOrDefault();
+            if (trayForm != null)
+            {
+                trayForm.Dispose();
+            }
+            foreach (var form in Application.OpenForms.Cast<Form>())
+            {
+                if (form != null)
+                {
+                    try
+                    {
+                        form.Close();
+                    }
+                    catch { }
+                    form.Dispose();
+                }
+            }
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            foreach (var proc in Process.GetProcessesByName(Path.GetFileNameWithoutExtension(Application.ExecutablePath)))
+            {
+                if (proc != null)
+                {
+                    proc.Kill();
+                }
+            }
+            Application.Exit();
         }
 
         protected override void OnLoad(EventArgs e)
@@ -41,7 +81,9 @@ namespace FrcDsAutoShutdown
             }
 
             settingsWindowInstance = new SettingsWindow();
-            DhcpManager.StartListening(settingsWindowInstance.ToggleDsIpLabel);
+            DhcpManager.StartIPOnlyListening(settingsWindowInstance.ToggleDsIpLabel);
+            if (DSEventsWatchdog.Configure())
+                DSEventsWatchdog.StartWatching();
         }
 
         public void OpenSettingsWindow()
@@ -63,7 +105,7 @@ namespace FrcDsAutoShutdown
 
         private void trayExitMenuItem_Click(object sender, EventArgs e)
         {
-            Application.Exit();
+            Exit();
         }
 
         private void trayIcon_MouseDoubleClick(object sender, MouseEventArgs e)
@@ -78,7 +120,7 @@ namespace FrcDsAutoShutdown
 
         public void ListenForPipeCommands()
         {
-            while (true)
+            while (keepAlive)
             {
                 using (var server = new NamedPipeServerStream(Program.pipeName, PipeDirection.In))
                 {

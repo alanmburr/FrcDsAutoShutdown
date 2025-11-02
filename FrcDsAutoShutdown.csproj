@@ -68,7 +68,7 @@
     <GenerateManifests>false</GenerateManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <SignManifests>true</SignManifests>
+    <SignManifests>false</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
     <TargetZone>LocalIntranet</TargetZone>
@@ -100,6 +100,8 @@
     <Compile Include="DoubleClickButton.Designer.cs">
       <DependentUpon>DoubleClickButton.cs</DependentUpon>
     </Compile>
+    <Compile Include="DSEventReader.cs" />
+    <Compile Include="DSEventsWatchdog.cs" />
     <Compile Include="ExternalProcessManager.cs" />
     <Compile Include="SettingsWindow.cs">
       <SubType>Form</SubType>

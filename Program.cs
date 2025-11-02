@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Pipes;
 using System.Linq;
@@ -16,6 +17,7 @@ namespace FrcDsAutoShutdown
         static Mutex mutex = new Mutex(true, Assembly.GetExecutingAssembly().FullName);
         public static string pipeName = Assembly.GetExecutingAssembly().FullName.Replace(" ", "") + "Pipe";
         public static TrayIconForm trayIconForm;
+        public static Task listenTask;
 
         /// <summary>
         /// The main entry point for the application.
@@ -51,13 +53,24 @@ namespace FrcDsAutoShutdown
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new TrayIconForm());
-            Application.ApplicationExit += (s, e) => mutex.ReleaseMutex();
+            Application.ApplicationExit += (s, e) =>
+            {
+                if (listenTask != null) listenTask.Dispose();
+                mutex.ReleaseMutex();
+                foreach (var proc in Process.GetProcessesByName(Path.GetFileNameWithoutExtension(Application.ExecutablePath)))
+                {
+                    if (proc != null)
+                    {
+                        proc.Kill();
+                    }
+                }
+            };
 
-            while (true)
+            while (TrayIconForm.keepAlive)
             {
                 if (trayIconForm != null)
                 {
-                    Task.Run(() => trayIconForm.ListenForPipeCommands());
+                    listenTask = Task.Run(() => trayIconForm.ListenForPipeCommands());
                     if (args.Contains("--settings"))
                     {
                         trayIconForm.OpenSettingsWindow();

@@ -42,11 +42,15 @@ namespace FrcDsAutoShutdown
             var teamIPNetwork = ExternalProcessManager.GetTeamNetworkIPAddressFromDSTeamNumberIni();
             if (teamIPNetwork.Equals(IPAddress.None))
             {
+                this.unknownIpLabel.Text = "Could not determine IP!";
+                this.unknownIpLabel.ForeColor = System.Drawing.Color.Red;
                 this.unknownIpLabel.Visible = true;
             }
             else
             {
-                this.unknownIpLabel.Visible = false;
+                this.unknownIpLabel.Text = $"Team IP Address: {teamIPNetwork.ToString()}";
+                this.unknownIpLabel.ForeColor = System.Drawing.Color.Green;
+                this.unknownIpLabel.Visible = true;
             }
 
 
@@ -59,13 +63,16 @@ namespace FrcDsAutoShutdown
         }
         private void killProgramsDataGrid_UserAddedRow(object sender, DataGridViewRowEventArgs e)
         {
-            var exeName = e.Row.Cells[0].Value.ToString().Trim();
+            var row = e.Row;
+            var cell = row.Cells[0];
+            string cellValue = cell.Value == null ? "" : cell.Value.ToString();
+            var exeName = string.IsNullOrEmpty(cellValue) ? "" : cellValue.Trim();
             var exeNameSplitRemove = exeName.LastIndexOf(".exe");
             exeName = exeName.Substring(0, exeNameSplitRemove == -1 ? exeName.Length : exeNameSplitRemove);
             Properties.Settings.Default.KillProgramExecutableNames.Add(exeName);
             Properties.Settings.Default.Save();
-            e.Row.Cells[0].Value = exeName;
-            FixDuplicatesInProgramsToKill();
+            //e.Row.Cells[0].Value = exeName;
+            //FixDuplicatesInProgramsToKill();
         }
 
         private void killProgramsDataGrid_UserDeletedRow(object sender, DataGridViewRowEventArgs e)
@@ -75,8 +82,8 @@ namespace FrcDsAutoShutdown
             exeName = exeName.Substring(0, exeNameSplitRemove == -1 ? exeName.Length : exeNameSplitRemove);
             Properties.Settings.Default.KillProgramExecutableNames.Remove(exeName);
             Properties.Settings.Default.Save();
-            e.Row.Cells[0].Value = exeName;
-            FixDuplicatesInProgramsToKill();
+            //e.Row.Cells[0].Value = exeName;
+            //FixDuplicatesInProgramsToKill();
         }
 
         private void enableApplicationCheckbox_CheckedChanged(object sender, EventArgs e)
@@ -87,7 +94,7 @@ namespace FrcDsAutoShutdown
 
         private void quitButton_DoubleClick(object sender, EventArgs e)
         {
-            Application.Exit();
+            TrayIconForm.Exit();
         }
 
         private void registerAutoStartCheckbox_CheckedChanged(object sender, EventArgs e)
@@ -165,7 +172,9 @@ namespace FrcDsAutoShutdown
         public void ToggleDsIpLabel(object sender, ElapsedEventArgs e)
         {
             var isVisible = DhcpManager.TeamIPNetwork.Equals(IPAddress.None);
-            this.unknownIpLabel.Visible = isVisible;
+            if (this.IsHandleCreated) this.Invoke(new Action(() => {
+                this.unknownIpLabel.Visible = isVisible;
+            }));
         }
 
         private void installToProgFilesButton_Click(object sender, EventArgs e)
@@ -192,6 +201,11 @@ namespace FrcDsAutoShutdown
         private void makeDesktopLnkButton_Click(object sender, EventArgs e)
         {
             Program.InstallSettingsShortcutToPublicDesktop();
+        }
+
+        private void shutDownPcBtn_DoubleClick(object sender, EventArgs e)
+        {
+            ExternalProcessManager.ShutdownWorkstation();
         }
     }
 }

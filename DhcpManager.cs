@@ -40,6 +40,16 @@ namespace FrcDsAutoShutdown
             recheckIPTimer.Enabled = true;
         }
 
+        public static void StartIPOnlyListening(ElapsedEventHandler elapsed = null)
+        {
+            if (recheckIPTimer == null)
+            {
+                ConfigureTimer(elapsed);
+            }
+            recheckIPTimer.Enabled = true;
+
+        }
+
         public static void StopListening()
         {
             NetworkChange.NetworkAddressChanged -= new NetworkAddressChangedEventHandler(AddressChangedCallback);
